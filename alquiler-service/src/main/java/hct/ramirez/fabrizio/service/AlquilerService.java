@@ -68,23 +68,77 @@ public class AlquilerService {
     public Mono<AlquilerModel> update(String id, AlquilerModel alquiler) {
         return alquilerRepository.findById(id)
                 .flatMap(existingAlquiler -> {
-                    alquiler.setId(id);
-                    return alquilerRepository.save(alquiler);
+                    // Verificar que el vehículo esté disponible o sea el mismo
+                    return webClient.get()
+                            .uri("http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api/vehiculos/" + alquiler.getVehiculoId())
+                            .retrieve()
+                            .bodyToMono(String.class)
+                            .flatMap(vehiculoJson -> {
+                                // Verificar que el vehículo esté activo
+                                if (!vehiculoJson.contains("\"estado\":\"DISPONIBLE\"") && !vehiculoJson.contains("\"estado\":\"ALQUILADO\"")) {
+                                    return Mono.error(new RuntimeException("El vehículo no está disponible"));
+                                }
+                                
+                                // Verificar que el cliente esté activo
+                                return webClient.get()
+                                        .uri("http://hct-cliente-ramirez-fabrizio-service.hct-cliente-ramirez-fabrizio.svc.cluster.local:8080/api/clientes/" + alquiler.getClienteId())
+                                        .retrieve()
+                                        .bodyToMono(String.class)
+                                        .flatMap(clienteJson -> {
+                                            if (!clienteJson.contains("\"estado\":\"ACTIVO\"")) {
+                                                return Mono.error(new RuntimeException("El cliente no está activo"));
+                                            }
+                                            
+                                            alquiler.setId(id);
+                                            String estadoAnterior = existingAlquiler.getEstado();
+                                            String estadoNuevo = alquiler.getEstado();
+                                            
+                                            return alquilerRepository.save(alquiler)
+                                                    .flatMap(savedAlquiler -> {
+                                                        // Si el estado cambia a ACTIVO, alquilar el vehículo
+                                                        if ("ACTIVO".equals(estadoNuevo) && !"ACTIVO".equals(estadoAnterior)) {
+                                                            return webClient.patch()
+                                                                    .uri("http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api/vehiculos/alquilar/" + alquiler.getVehiculoId())
+                                                                    .retrieve()
+                                                                    .bodyToMono(Void.class)
+                                                                    .thenReturn(savedAlquiler)
+                                                                    .onErrorResume(e -> Mono.just(savedAlquiler));
+                                                        }
+                                                        // Si el estado cambia de ACTIVO a otro, liberar el vehículo
+                                                        else if (!"ACTIVO".equals(estadoNuevo) && "ACTIVO".equals(estadoAnterior)) {
+                                                            return webClient.patch()
+                                                                    .uri("http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api/vehiculos/liberar/" + alquiler.getVehiculoId())
+                                                                    .retrieve()
+                                                                    .bodyToMono(Void.class)
+                                                                    .thenReturn(savedAlquiler)
+                                                                    .onErrorResume(e -> Mono.just(savedAlquiler));
+                                                        }
+                                                        return Mono.just(savedAlquiler);
+                                                    });
+                                        })
+                                        .onErrorResume(e -> Mono.error(new RuntimeException("Cliente no encontrado")));
+                            })
+                            .onErrorResume(e -> Mono.error(new RuntimeException("Vehículo no encontrado")));
                 });
     }
 
     public Mono<Void> deleteById(String id) {
         return alquilerRepository.findById(id)
                 .flatMap(alquiler -> {
-                    // Restaurar estado del vehículo a DISPONIBLE
-                    return webClient.patch()
-                            .uri("http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api/vehiculos/liberar/" + alquiler.getVehiculoId())
-                            .retrieve()
-                            .bodyToMono(Void.class)
-                            .then(alquilerRepository.deleteById(id))
-                            .onErrorResume(e -> alquilerRepository.deleteById(id)); // Si falla, aún elimina
+                    // Cambiar estado a CANCELADO y liberar el vehículo
+                    alquiler.setEstado("CANCELADO");
+                    return alquilerRepository.save(alquiler)
+                            .flatMap(savedAlquiler -> {
+                                // Restaurar estado del vehículo a DISPONIBLE
+                                return webClient.patch()
+                                        .uri("http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api/vehiculos/liberar/" + alquiler.getVehiculoId())
+                                        .retrieve()
+                                        .bodyToMono(Void.class)
+                                        .then()
+                                        .onErrorResume(e -> Mono.empty()); // Si falla, aún cambia el estado
+                            });
                 })
-                .switchIfEmpty(alquilerRepository.deleteById(id));
+                .switchIfEmpty(Mono.empty());
     }
 
     public Mono<AlquilerModel> cambiarEstado(String id, String nuevoEstado) {
