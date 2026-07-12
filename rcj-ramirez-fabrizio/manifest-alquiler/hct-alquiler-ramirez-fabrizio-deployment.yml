@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hct-alquiler-ramirez-fabrizio-deployment
+  namespace: hct-alquiler-ramirez-fabrizio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hct-alquiler-ramirez-fabrizio
+  template:
+    metadata:
+      labels:
+        app: hct-alquiler-ramirez-fabrizio
+    spec:
+      containers:
+      - name: hct-alquiler-ramirez-fabrizio-container
+        image: fabrizioleonardoramirez/hct-alquiler:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: hct-alquiler-ramirez-fabrizio-secret

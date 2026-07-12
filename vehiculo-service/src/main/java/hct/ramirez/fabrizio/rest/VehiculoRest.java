@@ -24,11 +24,9 @@ public class VehiculoRest {
     }
 
     @PostMapping public Mono<VehiculoModel> guardar(@RequestBody VehiculoModel vehiculo) {
-        // Validar que el ID no sea null o vacío si se envía
         if (vehiculo.getId() != null && vehiculo.getId().trim().isEmpty()) {
             vehiculo.setId(null);
         }
-        // Validar campos obligatorios
         if (vehiculo.getPlaca() == null || vehiculo.getPlaca().trim().isEmpty()) {
             return Mono.error(new RuntimeException("La placa es obligatoria"));
         }
@@ -64,6 +62,16 @@ public class VehiculoRest {
     @PatchMapping("/restaurar/{id}")
     public Mono<VehiculoModel> restaurar(@PathVariable String id) {
         return service.cambiarEstado(id, "DISPONIBLE");
+    }
+
+    @PatchMapping("/alquilar/{id}")
+    public Mono<VehiculoModel> alquilar(@PathVariable String id) {
+        return service.alquilar(id);
+    }
+
+    @PatchMapping("/liberar/{id}")
+    public Mono<VehiculoModel> liberar(@PathVariable String id) {
+        return service.liberar(id);
     }
 
     @DeleteMapping("/{id}") public Mono<Void> eliminar(@PathVariable String id) {

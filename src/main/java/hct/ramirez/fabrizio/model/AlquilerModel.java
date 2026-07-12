@@ -1,5 +1,6 @@
 package hct.ramirez.fabrizio.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class AlquilerModel {
     @Id
     private String id;
+    @JsonProperty("clienteId")
     private String clienteId;
     private String vehiculoId;
     private Integer dias;

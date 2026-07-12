@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hct-cliente-ramirez-fabrizio-deployment
+  namespace: hct-cliente-ramirez-fabrizio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hct-cliente-ramirez-fabrizio
+  template:
+    metadata:
+      labels:
+        app: hct-cliente-ramirez-fabrizio
+    spec:
+      containers:
+      - name: hct-cliente-ramirez-fabrizio-container
+        image: fabrizioleonardoramirez/hct-cliente:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: hct-cliente-ramirez-fabrizio-secret

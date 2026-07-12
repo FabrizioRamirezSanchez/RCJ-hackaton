@@ -44,4 +44,12 @@ public class VehiculoService {
                     return vehiculoRepository.save(vehiculo);
                 });
     }
+
+    public Mono<VehiculoModel> alquilar(String id) {
+        return cambiarEstado(id, "ALQUILADO");
+    }
+
+    public Mono<VehiculoModel> liberar(String id) {
+        return cambiarEstado(id, "DISPONIBLE");
+    }
 }

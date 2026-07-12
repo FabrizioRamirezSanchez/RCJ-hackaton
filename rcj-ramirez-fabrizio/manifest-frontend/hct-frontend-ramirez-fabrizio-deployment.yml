@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hct-frontend-ramirez-fabrizio-deployment
+  namespace: hct-frontend-ramirez-fabrizio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hct-frontend-ramirez-fabrizio
+  template:
+    metadata:
+      labels:
+        app: hct-frontend-ramirez-fabrizio
+    spec:
+      containers:
+      - name: hct-frontend-ramirez-fabrizio-container
+        image: fabrizioleonardoramirez/hct-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VEHICULO_API_URL
+          value: "http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api"
+        - name: CLIENTE_API_URL
+          value: "http://hct-cliente-ramirez-fabrizio-service.hct-cliente-ramirez-fabrizio.svc.cluster.local:8080/api"
+        - name: ALQUILER_API_URL
+          value: "http://hct-alquiler-ramirez-fabrizio-service.hct-alquiler-ramirez-fabrizio.svc.cluster.local:8080/api"

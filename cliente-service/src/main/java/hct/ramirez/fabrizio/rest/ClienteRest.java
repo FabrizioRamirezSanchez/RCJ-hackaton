@@ -24,11 +24,9 @@ public class ClienteRest {
     }
 
     @PostMapping public Mono<ClienteModel> guardar(@RequestBody ClienteModel cliente) {
-        // Validar que el ID no sea null o vacío si se envía
         if (cliente.getId() != null && cliente.getId().trim().isEmpty()) {
             cliente.setId(null);
         }
-        // Validar campos obligatorios
         if (cliente.getDni() == null || cliente.getDni().trim().isEmpty()) {
             return Mono.error(new RuntimeException("El DNI es obligatorio"));
         }

@@ -1,5 +1,6 @@
 package hct.ramirez.fabrizio.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +18,7 @@ public class VehiculoModel {
     private String placa;
     private String marca;
     private String modelo;
+    @JsonProperty("anio")
     private Integer anio;
     private String color;
     private Double precioPorDia;

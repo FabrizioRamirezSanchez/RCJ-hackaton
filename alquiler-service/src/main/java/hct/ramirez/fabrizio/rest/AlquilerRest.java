@@ -14,8 +14,7 @@ public class AlquilerRest {
     @Autowired
     private AlquilerService service;
 
-    @GetMapping
-    public Flux<AlquilerModel> listar() {
+    @GetMapping public Flux<AlquilerModel> listar() {
         return service.findAll();
     }
 
@@ -24,23 +23,17 @@ public class AlquilerRest {
         return service.findById(id);
     }
 
-    @PostMapping
-    public Mono<AlquilerModel> guardar(@RequestBody AlquilerModel alquiler) {
-        // Forzar estado a ACTIVO independientemente de lo que se envíe
-        alquiler.setEstado("ACTIVO");
-        
-        // Validar que el ID no sea null o vacío si se envía
+    @PostMapping public Mono<AlquilerModel> guardar(@RequestBody AlquilerModel alquiler) {
         if (alquiler.getId() != null && alquiler.getId().trim().isEmpty()) {
             alquiler.setId(null);
         }
-        // Validar campos obligatorios
         if (alquiler.getClienteId() == null || alquiler.getClienteId().trim().isEmpty()) {
-            return Mono.error(new RuntimeException("El clienteId es obligatorio"));
+            return Mono.error(new RuntimeException("El cliente es obligatorio"));
         }
         if (alquiler.getVehiculoId() == null || alquiler.getVehiculoId().trim().isEmpty()) {
-            return Mono.error(new RuntimeException("El vehiculoId es obligatorio"));
+            return Mono.error(new RuntimeException("El vehículo es obligatorio"));
         }
-        if (alquiler.getDias() == null) {
+        if (alquiler.getDias() == null || alquiler.getDias() <= 0) {
             return Mono.error(new RuntimeException("Los días son obligatorios"));
         }
         if (alquiler.getFechaInicio() == null || alquiler.getFechaInicio().trim().isEmpty()) {
@@ -49,9 +42,7 @@ public class AlquilerRest {
         if (alquiler.getFechaFin() == null || alquiler.getFechaFin().trim().isEmpty()) {
             return Mono.error(new RuntimeException("La fecha de fin es obligatoria"));
         }
-        if (alquiler.getTotal() == null) {
-            return Mono.error(new RuntimeException("El total es obligatorio"));
-        }
+        alquiler.setEstado("ACTIVO");
         return service.save(alquiler);
     }
 
@@ -62,7 +53,7 @@ public class AlquilerRest {
 
     @PatchMapping("/eliminar/{id}")
     public Mono<AlquilerModel> eliminarLogico(@PathVariable String id) {
-        return service.cambiarEstado(id, "CANCELADO");
+        return service.cambiarEstado(id, "INACTIVO");
     }
 
     @PatchMapping("/restaurar/{id}")
@@ -70,8 +61,7 @@ public class AlquilerRest {
         return service.cambiarEstado(id, "ACTIVO");
     }
 
-    @DeleteMapping("/{id}")
-    public Mono<Void> eliminar(@PathVariable String id) {
+    @DeleteMapping("/{id}") public Mono<Void> eliminar(@PathVariable String id) {
         return service.deleteById(id);
     }
 }
