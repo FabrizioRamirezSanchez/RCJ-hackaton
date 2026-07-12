@@ -1,0 +1,5 @@
+.container { padding: 20px; font-family: sans-serif; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background-color: #f4f4f4; }
+tr:hover { background-color: #f9f9f9; }

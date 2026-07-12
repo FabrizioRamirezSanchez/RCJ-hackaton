@@ -1,0 +1,83 @@
+<div class="container">
+  <h2>Gestión de Alquileres</h2>
+  
+  <button class="btn btn-primary" (click)="mostrarCrear()" *ngIf="!mostrarFormulario">
+    + Nuevo Alquiler
+  </button>
+
+  <div class="form-container" *ngIf="mostrarFormulario">
+    <h3>{{ editando ? 'Editar Alquiler' : 'Nuevo Alquiler' }}</h3>
+    <form [formGroup]="alquilerForm" (ngSubmit)="guardar()">
+      <div class="form-group">
+        <label>ID Cliente:</label>
+        <input type="text" formControlName="clienteId" required>
+      </div>
+      <div class="form-group">
+        <label>ID Vehículo:</label>
+        <input type="text" formControlName="vehiculoId" required>
+      </div>
+      <div class="form-group">
+        <label>Días:</label>
+        <input type="number" formControlName="dias" required>
+      </div>
+      <div class="form-group">
+        <label>Fecha Inicio:</label>
+        <input type="date" formControlName="fechaInicio" required>
+      </div>
+      <div class="form-group">
+        <label>Fecha Fin:</label>
+        <input type="date" formControlName="fechaFin" required>
+      </div>
+      <div class="form-group">
+        <label>Total:</label>
+        <input type="number" formControlName="total" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success" [disabled]="alquilerForm.invalid">
+          {{ editando ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-container" *ngIf="!mostrarFormulario">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>ID Cliente</th>
+          <th>ID Vehículo</th>
+          <th>Días</th>
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of alquileres; let i = index">
+          <td>{{ a.id }}</td>
+          <td>{{ a.clienteId }}</td>
+          <td>{{ a.vehiculoId }}</td>
+          <td>{{ a.dias }}</td>
+          <td>{{ a.fechaInicio }}</td>
+          <td>{{ a.fechaFin }}</td>
+          <td>{{ a.total }}</td>
+          <td [class]="'status-' + a.estado.toLowerCase()">{{ a.estado }}</td>
+          <td class="actions">
+            <button class="btn btn-small btn-edit" (click)="mostrarEditar(a)" title="Editar">✏️</button>
+            <button class="btn btn-small btn-delete" (click)="eliminarLogico(a.id)" title="Eliminar" *ngIf="a.estado === 'ACTIVO' || a.estado === 'PENDIENTE'">🗑️</button>
+            <button class="btn btn-small btn-restore" (click)="restaurar(a.id)" title="Restaurar" *ngIf="a.estado === 'CANCELADO'">♻️</button>
+          </td>
+        </tr>
+        <tr *ngIf="alquileres.length === 0">
+          <td colspan="9">No hay alquileres registrados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

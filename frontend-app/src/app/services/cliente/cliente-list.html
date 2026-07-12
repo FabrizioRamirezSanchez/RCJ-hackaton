@@ -1,0 +1,83 @@
+<div class="container">
+  <h2>Gestión de Clientes</h2>
+  
+  <button class="btn btn-primary" (click)="mostrarCrear()" *ngIf="!mostrarFormulario">
+    + Nuevo Cliente
+  </button>
+
+  <div class="form-container" *ngIf="mostrarFormulario">
+    <h3>{{ editando ? 'Editar Cliente' : 'Nuevo Cliente' }}</h3>
+    <form [formGroup]="clienteForm" (ngSubmit)="guardar()">
+      <div class="form-group">
+        <label>DNI:</label>
+        <input type="text" formControlName="dni" required>
+      </div>
+      <div class="form-group">
+        <label>Nombres:</label>
+        <input type="text" formControlName="nombres" required>
+      </div>
+      <div class="form-group">
+        <label>Apellidos:</label>
+        <input type="text" formControlName="apellidos" required>
+      </div>
+      <div class="form-group">
+        <label>Celular:</label>
+        <input type="text" formControlName="celular" required>
+      </div>
+      <div class="form-group">
+        <label>Correo:</label>
+        <input type="email" formControlName="correo" required>
+      </div>
+      <div class="form-group">
+        <label>Licencia:</label>
+        <input type="text" formControlName="licencia" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success" [disabled]="clienteForm.invalid">
+          {{ editando ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-container" *ngIf="!mostrarFormulario">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>DNI</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Celular</th>
+          <th>Correo</th>
+          <th>Licencia</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of clientes; let i = index">
+          <td>{{ c.id }}</td>
+          <td>{{ c.dni }}</td>
+          <td>{{ c.nombres }}</td>
+          <td>{{ c.apellidos }}</td>
+          <td>{{ c.celular }}</td>
+          <td>{{ c.correo }}</td>
+          <td>{{ c.licencia }}</td>
+          <td [class]="'status-' + c.estado.toLowerCase()">{{ c.estado }}</td>
+          <td class="actions">
+            <button class="btn btn-small btn-edit" (click)="mostrarEditar(c)" title="Editar">✏️</button>
+            <button class="btn btn-small btn-delete" (click)="eliminarLogico(c.id)" title="Eliminar" *ngIf="c.estado === 'ACTIVO'">🗑️</button>
+            <button class="btn btn-small btn-restore" (click)="restaurar(c.id)" title="Restaurar" *ngIf="c.estado === 'INACTIVO'">♻️</button>
+          </td>
+        </tr>
+        <tr *ngIf="clientes.length === 0">
+          <td colspan="9">No hay clientes registrados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
