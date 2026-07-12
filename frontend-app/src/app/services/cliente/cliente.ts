@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Cliente } from './cliente.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClienteService {
-  private apiUrl = 'http://hct-cliente-ramirez-fabrizio-service.hct-cliente-ramirez-fabrizio.svc.cluster.local:8080/api/clientes';
+  private apiUrl = environment.apiUrl.cliente;
 
   constructor(private http: HttpClient) { }
 

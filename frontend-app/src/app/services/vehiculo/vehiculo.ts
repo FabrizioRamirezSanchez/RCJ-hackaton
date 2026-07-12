@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Vehiculo } from './vehiculo.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VehiculoService {
-  private apiUrl = 'http://hct-vehiculo-ramirez-fabrizio-service.hct-vehiculo-ramirez-fabrizio.svc.cluster.local:8080/api/vehiculos';
+  private apiUrl = environment.apiUrl.vehiculo;
 
   constructor(private http: HttpClient) { }
 

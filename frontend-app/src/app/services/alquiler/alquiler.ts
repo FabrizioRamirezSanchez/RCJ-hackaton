@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Alquiler } from './alquiler.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AlquilerService {
-  private apiUrl = 'http://hct-alquiler-ramirez-fabrizio-service.hct-alquiler-ramirez-fabrizio.svc.cluster.local:8080/api/alquileres';
+  private apiUrl = environment.apiUrl.alquiler;
 
   constructor(private http: HttpClient) { }
 
